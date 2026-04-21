@@ -19,21 +19,45 @@ const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
   return url
 }
 
+const hasPostMeta = (
+  value: Partial<Page> | Partial<Post> | null,
+): value is Partial<Post> & { meta?: Post['meta'] } => {
+  return Boolean(value && 'meta' in value)
+}
+
+const hasPageSeo = (
+  value: Partial<Page> | Partial<Post> | null,
+): value is Partial<Page> & { seo?: Page['seo'] } => {
+  return Boolean(value && 'seo' in value)
+}
+
 export const generateMeta = async (args: {
   doc: Partial<Page> | Partial<Post> | null
 }): Promise<Metadata> => {
   const { doc } = args
 
-  const ogImage = getImageURL(doc?.meta?.image)
+  let metaTitle: string | null | undefined
+  let metaDescription: string | null | undefined
+  let metaImage: Media | Config['db']['defaultIDType'] | null | undefined
 
-  const title = doc?.meta?.title
-    ? doc?.meta?.title + ' | Payload Website Template'
-    : 'Payload Website Template'
+  if (hasPostMeta(doc)) {
+    metaTitle = doc.meta?.title
+    metaDescription = doc.meta?.description
+    metaImage = doc.meta?.image
+  } else if (hasPageSeo(doc)) {
+    metaTitle = doc.seo?.metaTitle
+    metaDescription = doc.seo?.metaDescription
+    metaImage = doc.seo?.metaImage
+  }
+
+  const ogImage = getImageURL(metaImage)
+
+  const title = metaTitle ? metaTitle + ' | Payload Website Template' : 'Payload Website Template'
 
   return {
-    description: doc?.meta?.description,
+    description: metaDescription,
     openGraph: mergeOpenGraph({
-      description: doc?.meta?.description || '',
+      description: metaDescription || '',
       images: ogImage
         ? [
             {

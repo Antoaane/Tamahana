@@ -1,10 +1,20 @@
 import { cn } from '@/utilities/ui'
 import React from 'react'
 import RichText from '@/components/RichText'
-
-import type { ContentBlock as ContentBlockProps } from '@/payload-types'
+import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
 import { CMSLink } from '../../components/Link'
+
+type ContentBlockProps = {
+  columns?:
+    | Array<{
+        enableLink?: boolean | null
+        link?: Parameters<typeof CMSLink>[0] | null
+        richText?: DefaultTypedEditorState | null
+        size?: 'full' | 'half' | 'oneThird' | 'twoThirds' | null
+      }>
+    | null
+}
 
 export const ContentBlock: React.FC<ContentBlockProps> = (props) => {
   const { columns } = props
@@ -23,10 +33,11 @@ export const ContentBlock: React.FC<ContentBlockProps> = (props) => {
           columns.length > 0 &&
           columns.map((col, index) => {
             const { enableLink, link, richText, size } = col
+            const sizeKey = size || 'oneThird'
 
             return (
               <div
-                className={cn(`col-span-4 lg:col-span-${colsSpanClasses[size!]}`, {
+                className={cn(`col-span-4 lg:col-span-${colsSpanClasses[sizeKey]}`, {
                   'md:col-span-2': size !== 'full',
                 })}
                 key={index}

@@ -2,24 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
-import { Archive } from '../../blocks/ArchiveBlock/config'
-import { CallToAction } from '../../blocks/CallToAction/config'
-import { Content } from '../../blocks/Content/config'
-import { FormBlock } from '../../blocks/Form/config'
-import { MediaBlock } from '../../blocks/MediaBlock/config'
-import { hero } from '@/heros/config'
-import { slugField } from 'payload'
-import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
-
-import {
-  MetaDescriptionField,
-  MetaImageField,
-  MetaTitleField,
-  OverviewField,
-  PreviewField,
-} from '@payloadcms/plugin-seo/fields'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -29,15 +13,14 @@ export const Pages: CollectionConfig<'pages'> = {
     read: authenticatedOrPublished,
     update: authenticated,
   },
-  // This config controls what's populated by default when a page is referenced
-  // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
-  // Type safe if the collection slug generic is passed to `CollectionConfig` - `CollectionConfig<'pages'>
   defaultPopulate: {
     title: true,
     slug: true,
+    pageType: true,
+    published: true,
   },
   admin: {
-    defaultColumns: ['title', 'slug', 'updatedAt'],
+    defaultColumns: ['title', 'slug', 'pageType', 'published', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
@@ -58,76 +41,310 @@ export const Pages: CollectionConfig<'pages'> = {
     {
       name: 'title',
       type: 'text',
+      label: 'Nom de la page',
       required: true,
     },
     {
-      type: 'tabs',
-      tabs: [
+      name: 'slug',
+      type: 'text',
+      label: 'URL de la page',
+      required: true,
+      unique: true,
+      index: true,
+    },
+    {
+      name: 'pageType',
+      type: 'select',
+      label: 'Type de page',
+      required: true,
+      defaultValue: 'standard',
+      options: [
         {
-          fields: [hero],
-          label: 'Hero',
+          label: 'Page de lancement',
+          value: 'landing',
         },
         {
-          fields: [
-            {
-              name: 'layout',
-              type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
-              required: true,
-              admin: {
-                initCollapsed: true,
-              },
-            },
-          ],
-          label: 'Content',
-        },
-        {
-          name: 'meta',
-          label: 'SEO',
-          fields: [
-            OverviewField({
-              titlePath: 'meta.title',
-              descriptionPath: 'meta.description',
-              imagePath: 'meta.image',
-            }),
-            MetaTitleField({
-              hasGenerateFn: true,
-            }),
-            MetaImageField({
-              relationTo: 'media',
-            }),
-
-            MetaDescriptionField({}),
-            PreviewField({
-              // if the `generateUrl` function is configured
-              hasGenerateFn: true,
-
-              // field paths to match the target field for data
-              titlePath: 'meta.title',
-              descriptionPath: 'meta.description',
-            }),
-          ],
+          label: 'Page standard',
+          value: 'standard',
         },
       ],
     },
     {
-      name: 'publishedAt',
-      type: 'date',
-      admin: {
-        position: 'sidebar',
-      },
+      name: 'published',
+      type: 'checkbox',
+      label: 'Page publiée',
+      defaultValue: false,
     },
-    slugField(),
+    {
+      name: 'seo',
+      type: 'group',
+      label: 'Référencement',
+      fields: [
+        {
+          name: 'metaTitle',
+          type: 'text',
+          label: 'Titre SEO',
+        },
+        {
+          name: 'metaDescription',
+          type: 'textarea',
+          label: 'Description SEO',
+        },
+        {
+          name: 'metaImage',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Image SEO',
+        },
+      ],
+    },
+    {
+      name: 'landingContent',
+      type: 'group',
+      label: 'Contenu de la landing page',
+      admin: {
+        condition: (data) => data?.pageType === 'landing',
+      },
+      fields: [
+        {
+          type: 'collapsible',
+          label: 'Section principale',
+          admin: {
+            initCollapsed: true,
+          },
+          fields: [
+            {
+              name: 'hero',
+              type: 'group',
+              label: false,
+              fields: [
+                {
+                  name: 'backgroundImageDesktop',
+                  type: 'upload',
+                  relationTo: 'media',
+                  label: 'Image de fond desktop',
+                },
+                {
+                  name: 'backgroundImageMobile',
+                  type: 'upload',
+                  relationTo: 'media',
+                  label: 'Image de fond mobile',
+                },
+                {
+                  name: 'title',
+                  type: 'text',
+                  label: 'Titre principal',
+                },
+                {
+                  name: 'subtitle',
+                  type: 'text',
+                  label: 'Sous-titre principal',
+                },
+                {
+                  name: 'launchDate',
+                  type: 'date',
+                  label: 'Date de lancement',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'collapsible',
+          label: 'Section produits mis en avant',
+          admin: {
+            initCollapsed: true,
+          },
+          fields: [
+            {
+              name: 'featuredProducts',
+              type: 'group',
+              label: false,
+              fields: [
+                {
+                  name: 'items',
+                  type: 'array',
+                  label: 'Produits',
+                  labels: {
+                    singular: 'Produit',
+                    plural: 'Produits',
+                  },
+                  fields: [
+                    {
+                      name: 'image',
+                      type: 'upload',
+                      relationTo: 'media',
+                      label: 'Image',
+                    },
+                    {
+                      name: 'name',
+                      type: 'text',
+                      label: 'Nom du produit',
+                    },
+                    {
+                      name: 'collection',
+                      type: 'text',
+                      label: 'Collection',
+                    },
+                    {
+                      name: 'price',
+                      type: 'text',
+                      label: 'Prix',
+                    },
+                    {
+                      name: 'link',
+                      type: 'text',
+                      label: 'Lien',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'collapsible',
+          label: "Section liste d'attente",
+          admin: {
+            initCollapsed: true,
+          },
+          fields: [
+            {
+              name: 'waitlist',
+              type: 'group',
+              label: false,
+              fields: [
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'media',
+                  label: 'Image',
+                },
+                {
+                  name: 'title',
+                  type: 'text',
+                  label: 'Titre',
+                },
+                {
+                  name: 'description',
+                  type: 'textarea',
+                  label: 'Description',
+                },
+                {
+                  name: 'buttonLabel',
+                  type: 'text',
+                  label: 'Texte du bouton',
+                },
+                {
+                  name: 'successMessage',
+                  type: 'textarea',
+                  label: 'Message de confirmation',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'collapsible',
+          label: 'Section histoire',
+          admin: {
+            initCollapsed: true,
+          },
+          fields: [
+            {
+              name: 'story',
+              type: 'group',
+              label: false,
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  label: 'Titre',
+                },
+                {
+                  name: 'introduction',
+                  type: 'textarea',
+                  label: 'Introduction',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'collapsible',
+          label: 'Section matières',
+          admin: {
+            initCollapsed: true,
+          },
+          fields: [
+            {
+              name: 'materials',
+              type: 'group',
+              label: false,
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  label: 'Titre',
+                },
+                {
+                  name: 'content',
+                  type: 'textarea',
+                  label: 'Contenu',
+                },
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'media',
+                  label: 'Image',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'collapsible',
+          label: 'Section designs',
+          admin: {
+            initCollapsed: true,
+          },
+          fields: [
+            {
+              name: 'designs',
+              type: 'group',
+              label: false,
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  label: 'Titre',
+                },
+                {
+                  name: 'content',
+                  type: 'textarea',
+                  label: 'Contenu',
+                },
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'media',
+                  label: 'Image',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   hooks: {
     afterChange: [revalidatePage],
-    beforeChange: [populatePublishedAt],
     afterDelete: [revalidateDelete],
   },
   versions: {
     drafts: {
       autosave: {
-        interval: 100, // We set this interval for optimal live preview
+        interval: 100,
       },
       schedulePublish: true,
     },

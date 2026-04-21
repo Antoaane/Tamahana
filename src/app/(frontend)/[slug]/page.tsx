@@ -1,17 +1,25 @@
 import type { Metadata } from 'next'
 
 import { PayloadRedirects } from '@/components/PayloadRedirects'
+import { LandingPage, type LandingPageData } from '@/components/landing/LandingPage'
 import configPromise from '@payload-config'
-import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
+import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
-import React, { cache } from 'react'
+import { cache } from 'react'
 import { homeStatic } from '@/endpoints/seed/home-static'
-
-import { RenderBlocks } from '@/blocks/RenderBlocks'
-import { RenderHero } from '@/heros/RenderHero'
-import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+
+type PageSEO = {
+  metaTitle?: string | null
+  metaDescription?: string | null
+} | null
+
+type PageDocument = LandingPageData & {
+  slug?: string | null
+  pageType?: 'landing' | 'standard' | null
+  seo?: PageSEO
+}
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -46,16 +54,13 @@ type Args = {
 export default async function Page({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
   const { slug = 'home' } = await paramsPromise
-  // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const url = '/' + decodedSlug
-  let page: RequiredDataFromCollectionSlug<'pages'> | null
 
-  page = await queryPageBySlug({
+  let page = await queryPageBySlug({
     slug: decodedSlug,
   })
 
-  // Remove this code once your website is seeded
   if (!page && slug === 'home') {
     page = homeStatic
   }
@@ -64,31 +69,32 @@ export default async function Page({ params: paramsPromise }: Args) {
     return <PayloadRedirects url={url} />
   }
 
-  const { hero, layout } = page
+  if (page.pageType !== 'landing') {
+    return null
+  }
 
   return (
-    <article className="pt-16 pb-24">
+    <div>
       <PageClient />
-      {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
-
       {draft && <LivePreviewListener />}
-
-      <RenderHero {...hero} />
-      <RenderBlocks blocks={layout} />
-    </article>
+      <LandingPage page={page} />
+    </div>
   )
 }
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug = 'home' } = await paramsPromise
-  // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
+
   const page = await queryPageBySlug({
     slug: decodedSlug,
   })
 
-  return generateMeta({ doc: page })
+  return {
+    title: page?.seo?.metaTitle || page?.title || undefined,
+    description: page?.seo?.metaDescription || undefined,
+  }
 }
 
 const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
@@ -109,5 +115,5 @@ const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
     },
   })
 
-  return result.docs?.[0] || null
+  return (result.docs?.[0] as PageDocument | undefined) || null
 })

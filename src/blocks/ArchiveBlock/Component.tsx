@@ -1,11 +1,40 @@
-import type { Post, ArchiveBlock as ArchiveBlockProps } from '@/payload-types'
+import type { Post } from '@/payload-types'
 
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
 import RichText from '@/components/RichText'
+import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
+
+type ArchiveBlockProps = {
+  categories?:
+    | Array<
+        | {
+            id: number | string
+          }
+        | number
+        | string
+      >
+    | null
+  id?: string
+  introContent?: DefaultTypedEditorState | null
+  limit?: number | null
+  populateBy?: 'collection' | 'selection' | null
+  selectedDocs?:
+    | Array<{
+        value?:
+          | Post
+          | {
+              id: number | string
+            }
+          | number
+          | string
+          | null
+      }>
+    | null
+}
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
@@ -45,7 +74,14 @@ export const ArchiveBlock: React.FC<
   } else {
     if (selectedDocs?.length) {
       const filteredSelectedPosts = selectedDocs.map((post) => {
-        if (typeof post.value === 'object') return post.value
+        if (
+          post.value &&
+          typeof post.value === 'object' &&
+          'slug' in post.value &&
+          'title' in post.value
+        ) {
+          return post.value as Post
+        }
       }) as Post[]
 
       posts = filteredSelectedPosts
