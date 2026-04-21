@@ -202,6 +202,68 @@ export interface Page {
     media?: (number | null) | Media;
   };
   layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  landingPage?: {
+    heroSection?: {
+      backgroundImage?: (number | null) | Media;
+      brandMark?: (number | null) | Media;
+      brandName?: string | null;
+      tagline?: string | null;
+      navigationLinks?:
+        | {
+            label: string;
+            /**
+             * Exemple: preorder, histoire, contact
+             */
+            targetId: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    dropSection?: {
+      countdownLabel?: string | null;
+      countdownTargetDate?: string | null;
+      pieces?:
+        | {
+            image?: (number | null) | Media;
+            name: string;
+            collectionName?: string | null;
+            priceLabel?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    newsletterSection?: {
+      sideImage?: (number | null) | Media;
+      icon?: (number | null) | Media;
+      headline?: string | null;
+      description?: string | null;
+      firstNamePlaceholder?: string | null;
+      emailPlaceholder?: string | null;
+      submitLabel?: string | null;
+    };
+    storySection?: {
+      heading?: string | null;
+      introParagraphs?:
+        | {
+            text: string;
+            id?: string | null;
+          }[]
+        | null;
+      featureRows?:
+        | {
+            title: string;
+            paragraphs?:
+              | {
+                  text: string;
+                  id?: string | null;
+                }[]
+              | null;
+            image?: (number | null) | Media;
+            id?: string | null;
+          }[]
+        | null;
+    };
+  };
   meta?: {
     title?: string | null;
     /**
@@ -1089,6 +1151,75 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+      };
+  landingPage?:
+    | T
+    | {
+        heroSection?:
+          | T
+          | {
+              backgroundImage?: T;
+              brandMark?: T;
+              brandName?: T;
+              tagline?: T;
+              navigationLinks?:
+                | T
+                | {
+                    label?: T;
+                    targetId?: T;
+                    id?: T;
+                  };
+            };
+        dropSection?:
+          | T
+          | {
+              countdownLabel?: T;
+              countdownTargetDate?: T;
+              pieces?:
+                | T
+                | {
+                    image?: T;
+                    name?: T;
+                    collectionName?: T;
+                    priceLabel?: T;
+                    id?: T;
+                  };
+            };
+        newsletterSection?:
+          | T
+          | {
+              sideImage?: T;
+              icon?: T;
+              headline?: T;
+              description?: T;
+              firstNamePlaceholder?: T;
+              emailPlaceholder?: T;
+              submitLabel?: T;
+            };
+        storySection?:
+          | T
+          | {
+              heading?: T;
+              introParagraphs?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              featureRows?:
+                | T
+                | {
+                    title?: T;
+                    paragraphs?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                        };
+                    image?: T;
+                    id?: T;
+                  };
+            };
       };
   meta?:
     | T
