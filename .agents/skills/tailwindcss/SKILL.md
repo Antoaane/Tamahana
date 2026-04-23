@@ -64,12 +64,20 @@ Toujours vérifier :
 - Éviter les empilements de classes responsive inutiles
 - Garder une structure lisible
 
-### 7) Classes lisibles
+### 7) Unités viewport (`vh`, `dvh`, `svh`, `lvh`)
+- Par défaut pour les sections plein écran sur mobile moderne : préférer `dvh` (`h-dvh`, `min-h-dvh`) pour suivre la hauteur visible réelle quand les barres navigateur apparaissent/disparaissent.
+- Utiliser `svh` (`h-svh`, `min-h-svh`) quand il faut garantir qu’aucun contenu ne soit masqué, même avec UI navigateur présente.
+- Utiliser `lvh` (`h-lvh`, `min-h-lvh`) seulement si tu veux explicitement la plus grande hauteur possible (cas visuels spécifiques).
+- Éviter `100vh` comme choix par défaut mobile : il peut causer du contenu coupé ou des sauts de layout.
+- Pour robustifier un layout : combiner fallback + unité moderne, par exemple `min-h-screen min-h-dvh`.
+- Privilégier les utilitaires Tailwind natifs (`h-dvh`, `min-h-dvh`, `max-h-dvh`) avant toute valeur arbitraire.
+
+### 8) Classes lisibles
 - Garder les classes groupées de façon logique : layout, spacing, typography, color, effects, state
 - Si le repo utilise le tri automatique Tailwind via Prettier, respecter ce format
 - Si une ligne devient illisible, factoriser via composant, helper, ou utility dédiée
 
-### 8) Pas de bricolage
+### 9) Pas de bricolage
 - Ne pas ajouter de dépendance UI si la demande porte juste sur du styling
 - Ne pas introduire du CSS inline sans raison
 - Ne pas multiplier les `!important`
