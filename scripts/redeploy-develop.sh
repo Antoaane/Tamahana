@@ -19,8 +19,8 @@ CERTBOT_EMAIL="${CERTBOT_EMAIL:-antoinelauzis@gmail.com}"
 DOMAIN="${DOMAIN:-tamahana.fr}"
 DOMAIN_WWW="${DOMAIN_WWW:-www.${DOMAIN}}"
 ENABLE_DB_RESET="${ENABLE_DB_RESET:-false}"
-DB_NAME="${DB_NAME:-tamahana_db}"
-DB_OWNER="${DB_OWNER:-tamahana}"
+DB_NAME="${DB_NAME:-}"
+DB_OWNER="${DB_OWNER:-}"
 DB_OWNER_PASSWORD="${DB_OWNER_PASSWORD:-}"
 
 ########################################
@@ -37,6 +37,16 @@ die() {
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || die "Commande manquante: $1"
+}
+
+ensure_safe_cwd() {
+  local cwd
+  cwd="$(pwd -P 2>/dev/null || true)"
+
+  # If cwd is gone (or inside APP_DIR that is about to be deleted), move to a safe location.
+  if [ -z "${cwd}" ] || [ "${cwd}" = "${APP_DIR}" ] || [[ "${cwd}" == "${APP_DIR}/"* ]]; then
+    cd /
+  fi
 }
 
 get_env_value() {
@@ -71,6 +81,11 @@ require_cmd git
 require_cmd node
 require_cmd npm
 require_cmd systemctl
+
+SCRIPT_PATH="$(readlink -f "$0" 2>/dev/null || true)"
+if [ -n "${SCRIPT_PATH}" ] && [[ "${SCRIPT_PATH}" == "${APP_DIR}/"* ]]; then
+  log "INFO: script lancé depuis APP_DIR; il sera supprimé puis recréé pendant le redeploy."
+fi
 
 ########################################
 # Ensure runtime user + folders
@@ -160,11 +175,12 @@ fi
 ########################################
 # Recreate app instance from develop
 ########################################
+ensure_safe_cwd
 log "Suppression instance applicative: ${APP_DIR}"
 rm -rf "${APP_DIR}"
 
 log "Clone ${REPO_URL} (branche ${BRANCH})"
-sudo -u "${APP_USER}" -H git clone --branch "${BRANCH}" --single-branch "${REPO_URL}" "${APP_DIR}"
+sudo -u "${APP_USER}" -H git -C "${APP_BASE_DIR}" clone --branch "${BRANCH}" --single-branch "${REPO_URL}" app
 
 log "Installation dépendances + build + migrations"
 sudo -u "${APP_USER}" -H bash -lc "cd '${APP_DIR}' && npm ci && npm run build && npm run payload -- migrate"
