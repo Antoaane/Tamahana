@@ -212,6 +212,17 @@ export interface Page {
       content?: string | null;
       image?: (number | null) | Media;
     };
+    socialLinks?: {
+      title?: string | null;
+      items?:
+        | {
+            name: string;
+            link: string;
+            icon?: ('instagram' | 'facebook' | 'x' | 'youtube' | 'linkedin' | 'website') | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
   };
   updatedAt: string;
   createdAt: string;
@@ -954,6 +965,19 @@ export interface PagesSelect<T extends boolean = true> {
               title?: T;
               content?: T;
               image?: T;
+            };
+        socialLinks?:
+          | T
+          | {
+              title?: T;
+              items?:
+                | T
+                | {
+                    name?: T;
+                    link?: T;
+                    icon?: T;
+                    id?: T;
+                  };
             };
       };
   updatedAt?: T;

@@ -247,7 +247,12 @@ export const Pages: CollectionConfig<'pages'> = {
                   name: 'image',
                   type: 'upload',
                   relationTo: 'media',
-                  label: 'Image',
+                  label: 'Vidéo',
+                  filterOptions: {
+                    mimeType: {
+                      contains: 'video',
+                    },
+                  },
                 },
                 {
                   name: 'title',
@@ -358,6 +363,85 @@ export const Pages: CollectionConfig<'pages'> = {
                   type: 'upload',
                   relationTo: 'media',
                   label: 'Image',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'collapsible',
+          label: 'Section reseaux sociaux',
+          admin: {
+            initCollapsed: true,
+          },
+          fields: [
+            {
+              name: 'socialLinks',
+              type: 'group',
+              label: false,
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  label: 'Titre',
+                },
+                {
+                  name: 'items',
+                  type: 'array',
+                  label: 'Reseaux',
+                  labels: {
+                    singular: 'Reseau',
+                    plural: 'Reseaux',
+                  },
+                  fields: [
+                    {
+                      name: 'name',
+                      type: 'text',
+                      label: 'Nom affiche',
+                      required: true,
+                    },
+                    {
+                      name: 'link',
+                      type: 'text',
+                      label: 'Lien',
+                      required: true,
+                      admin: {
+                        placeholder: 'https://instagram.com/...',
+                      },
+                    },
+                    {
+                      name: 'icon',
+                      type: 'select',
+                      label: 'Icone',
+                      defaultValue: 'website',
+                      options: [
+                        {
+                          label: 'Instagram',
+                          value: 'instagram',
+                        },
+                        {
+                          label: 'Facebook',
+                          value: 'facebook',
+                        },
+                        {
+                          label: 'X',
+                          value: 'x',
+                        },
+                        {
+                          label: 'YouTube',
+                          value: 'youtube',
+                        },
+                        {
+                          label: 'LinkedIn',
+                          value: 'linkedin',
+                        },
+                        {
+                          label: 'Site web',
+                          value: 'website',
+                        },
+                      ],
+                    },
+                  ],
                 },
               ],
             },

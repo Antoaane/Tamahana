@@ -10,6 +10,62 @@
 @custom-variant xl (@media (width >= theme(--breakpoint-xl)));
 @custom-variant 2xl (@media (width >= theme(--breakpoint-2xl)));
 
+@font-face {
+  font-family: 'Alice';
+  src: url('/fonts/Alice Regular/Alice-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Baskervville';
+  src: url('/fonts/Baskervville/Baskervville-VariableFont_wght.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Baskervville';
+  src: url('/fonts/Baskervville/Baskervville-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Charm';
+  src: url('/fonts/Charm/Charm-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Charm';
+  src: url('/fonts/Charm/Charm-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cinzel';
+  src: url('/fonts/Cinzel/Cinzel-VariableFont_wght.ttf') format('truetype');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cloud Lucent';
+  src: url('/fonts/Cloud Lucent/cloud-lucent-regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   h1,
   h2,
@@ -45,6 +101,11 @@
   --breakpoint-2xl: 86rem;
   --font-mono: var(--font-geist-mono);
   --font-sans: var(--font-geist-sans);
+  --font-alice: 'Alice', serif;
+  --font-baskervville: 'Baskervville', serif;
+  --font-charm: 'Charm', cursive;
+  --font-cinzel: 'Cinzel', serif;
+  --font-cloud-lucent: 'Cloud Lucent', serif;
 }
 
 @layer utilities {
@@ -52,6 +113,60 @@
     width: 100%;
     margin-inline: auto;
     padding-inline: 1rem;
+  }
+
+  .image-mask-1 {
+    -webkit-mask-image: url('/svgs/mask-1.svg');
+    mask-image: url('/svgs/mask-1.svg');
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
+
+  .image-mask-2 {
+    -webkit-mask-image: url('/svgs/mask-2.svg');
+    mask-image: url('/svgs/mask-2.svg');
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
+
+  .hero-grain-overlay {
+    --hero-grain-opacity: 0.25;
+    --hero-grain-size: 132px;
+    --hero-grain-contrast: 50%;
+    --hero-grain-brightness: 150%;
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background-image: url('/svgs/hero-grain.svg');
+    background-repeat: repeat;
+    background-size: var(--hero-grain-size) var(--hero-grain-size);
+    mix-blend-mode: hard-light;
+    filter: contrast(var(--hero-grain-contrast)) brightness(var(--hero-grain-brightness));
+    opacity: var(--hero-grain-opacity);
+  }
+
+  .hero-background-dim-overlay {
+    --hero-dim-opacity: 0.25;
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(8, 6, 9, 0.38) 0%,
+      rgba(8, 6, 9, 0.56) 52%,
+      rgba(8, 6, 9, 0.74) 100%
+    );
+    opacity: var(--hero-dim-opacity);
   }
 
   @variant sm {
@@ -64,6 +179,15 @@
     .container {
       max-width: var(--breakpoint-md);
       padding-inline: 2rem;
+    }
+
+    .hero-grain-overlay {
+      --hero-grain-size: 148px;
+      --hero-grain-opacity: 0.25;
+    }
+
+    .hero-background-dim-overlay {
+      --hero-dim-opacity: 0.25;
     }
   }
 
@@ -87,6 +211,8 @@
 }
 
 :root {
+  --font-cinzel: 'Cinzel', serif;
+  --font-baskervville: 'Baskervville', serif;
   --palette-1: #fff6e5;
   --palette-2: #fffcf1;
   --palette-3: #7a6a4b;
@@ -94,6 +220,8 @@
   --palette-5: #ffcb6c;
   --palette-6: #ff57a2;
   --palette-7: #f8e088;
+  --palette-8: #FFD6E4;
+  --palette-text: #443B2B;
   --background: oklch(100% 0 0deg);
   --foreground: oklch(14.5% 0 0deg);
   --card: oklch(96.5% 0.005 265deg);
@@ -178,6 +306,8 @@
   --color-palette-5: var(--palette-5);
   --color-palette-6: var(--palette-6);
   --color-palette-7: var(--palette-7);
+  --color-palette-8: var(--palette-8);
+  --color-palette-text: var(--palette-text);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
