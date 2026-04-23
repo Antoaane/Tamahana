@@ -16,18 +16,39 @@ export const WaitlistSection = ({
       <h2>{title}</h2>
       <p>{description}</p>
 
-      <form>
+      <form
+        action="https://assets.mailerlite.com/jsonp/2283434/forms/185369647657256075/subscribe"
+        method="post"
+        target="_blank"
+      >
         <div>
-          <label htmlFor="waitlist-firstname">Prénom</label>
-          <input id="waitlist-firstname" name="firstname" type="text" />
+          <input
+            aria-label="name"
+            aria-required="true"
+            type="text"
+            name="fields[name]"
+            placeholder="Ton prénom"
+            autoComplete="given-name"
+            required
+          />
         </div>
 
         <div>
-          <label htmlFor="waitlist-email">E-mail</label>
-          <input id="waitlist-email" name="email" type="email" />
+          <input
+            aria-label="email"
+            aria-required="true"
+            type="email"
+            name="fields[email]"
+            placeholder="Ton e-mail"
+            autoComplete="email"
+            required
+          />
         </div>
 
-        <button type="button">{buttonLabel || "Je m'inscris"}</button>
+        <input type="hidden" name="ml-submit" value="1" />
+        <input type="hidden" name="anticsrf" value="true" />
+
+        <button type="submit">{buttonLabel || "Je m'inscris"}</button>
       </form>
 
       <p>{successMessage}</p>

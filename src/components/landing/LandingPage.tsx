@@ -9,6 +9,9 @@ type LandingContent = {
   hero?: {
     title?: string | null
     subtitle?: string | null
+    launchDate?: string | null
+    launchTime?: string | null
+    launchTimezone?: string | null
   } | null
   featuredProducts?: {
     items?: FeaturedProductItem[] | null
@@ -50,6 +53,9 @@ export const LandingPage = ({ page }: LandingPageProps) => {
       <HeroSection
         title={landingContent?.hero?.title ?? page.title}
         subtitle={landingContent?.hero?.subtitle}
+        launchDate={landingContent?.hero?.launchDate}
+        launchTime={landingContent?.hero?.launchTime}
+        launchTimezone={landingContent?.hero?.launchTimezone}
       />
 
       <FeaturedProductsSection items={landingContent?.featuredProducts?.items ?? []} />

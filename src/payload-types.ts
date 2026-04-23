@@ -173,6 +173,11 @@ export interface Page {
       title?: string | null;
       subtitle?: string | null;
       launchDate?: string | null;
+      /**
+       * Format 24h (HH:mm), ex. 18:30
+       */
+      launchTime?: string | null;
+      launchTimezone?: ('Europe/Paris' | 'UTC' | 'America/New_York') | null;
     };
     featuredProducts?: {
       items?:
@@ -904,6 +909,8 @@ export interface PagesSelect<T extends boolean = true> {
               title?: T;
               subtitle?: T;
               launchDate?: T;
+              launchTime?: T;
+              launchTimezone?: T;
             };
         featuredProducts?:
           | T

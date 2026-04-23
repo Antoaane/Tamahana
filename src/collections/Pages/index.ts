@@ -145,6 +145,35 @@ export const Pages: CollectionConfig<'pages'> = {
                   type: 'date',
                   label: 'Date de lancement',
                 },
+                {
+                  name: 'launchTime',
+                  type: 'text',
+                  label: 'Heure de lancement',
+                  admin: {
+                    description: 'Format 24h (HH:mm), ex. 18:30',
+                    placeholder: '18:30',
+                  },
+                },
+                {
+                  name: 'launchTimezone',
+                  type: 'select',
+                  label: 'Fuseau horaire',
+                  defaultValue: 'Europe/Paris',
+                  options: [
+                    {
+                      label: 'Europe/Paris',
+                      value: 'Europe/Paris',
+                    },
+                    {
+                      label: 'UTC',
+                      value: 'UTC',
+                    },
+                    {
+                      label: 'America/New_York',
+                      value: 'America/New_York',
+                    },
+                  ],
+                },
               ],
             },
           ],
