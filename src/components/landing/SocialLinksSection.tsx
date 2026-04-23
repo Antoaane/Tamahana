@@ -80,7 +80,10 @@ export const SocialLinksSection = ({ title, items }: SocialLinksSectionProps) =>
   }
 
   return (
-    <section className="relative isolate overflow-hidden border-t border-palette-4/30 bg-palette-2 py-10 md:py-12">
+    <section
+      id="social-links-section"
+      className="relative isolate overflow-hidden border-t border-palette-4/30 bg-palette-2 py-10 md:py-12"
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[url('/svgs/polynesian-patterns.svg')] bg-repeat opacity-[0.03] [background-size:clamp(44rem,90vw,120rem)_auto]"

@@ -364,7 +364,10 @@ export const FeaturedProductsSection = ({
   const productsToDisplay = useMemo(() => normalizeProducts(items), [items])
 
   return (
-    <section className="relative isolate overflow-hidden border-y border-palette-4/25 bg-palette-1 py-16 md:py-20 lg:py-24">
+    <section
+      id="featured-products-section"
+      className="relative isolate overflow-hidden border-y border-palette-4/25 bg-palette-1 py-16 md:py-20 lg:py-24"
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[url('/svgs/polynesian-patterns.svg')] bg-repeat opacity-[0.02] [background-size:clamp(52rem,95vw,132rem)_auto]"

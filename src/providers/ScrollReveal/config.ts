@@ -1,6 +1,7 @@
 export const scrollRevealConfig = {
   delayMs: 300,
-  triggerOffsetVw: 20,
+  triggerOffsetVh: 15,
+  heroDelayMultiplier: 2,
   baseViewOffset: {
     top: 24,
     right: 0,
@@ -8,5 +9,8 @@ export const scrollRevealConfig = {
   },
 } as const
 
-export const getBottomTriggerOffsetPx = (viewportWidth: number) =>
-  Math.round((viewportWidth * scrollRevealConfig.triggerOffsetVw) / 100)
+export const getBottomTriggerOffsetPxFromVh = (viewportHeight: number) =>
+  Math.round((viewportHeight * scrollRevealConfig.triggerOffsetVh) / 100)
+
+export const getHeroDelayMs = () =>
+  Math.round(scrollRevealConfig.delayMs * scrollRevealConfig.heroDelayMultiplier)

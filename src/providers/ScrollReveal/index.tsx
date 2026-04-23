@@ -3,15 +3,16 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
-import { getBottomTriggerOffsetPx, scrollRevealConfig } from './config'
+import { getBottomTriggerOffsetPxFromVh, getHeroDelayMs, scrollRevealConfig } from './config'
 
 const HEADING_SELECTOR =
-  '#site-content h1:not(.sr-only), #site-content h2:not(.sr-only), #site-content h3:not(.sr-only), #site-content h4:not(.sr-only), #site-content h5:not(.sr-only), #site-content h6:not(.sr-only)'
+  '#site-content h1:not(.sr-only):not([data-sr-hero-item="true"]), #site-content h2:not(.sr-only):not([data-sr-hero-item="true"]), #site-content h3:not(.sr-only):not([data-sr-hero-item="true"]), #site-content h4:not(.sr-only):not([data-sr-hero-item="true"]), #site-content h5:not(.sr-only):not([data-sr-hero-item="true"]), #site-content h6:not(.sr-only):not([data-sr-hero-item="true"])'
 const TEXT_SELECTOR =
-  '#site-content p:not(.sr-only):not([data-sr-timer="true"]), #site-content li:not(.sr-only), #site-content blockquote, #site-content figcaption'
+  '#site-content p:not(.sr-only):not([data-sr-timer="true"]):not([data-sr-hero-item="true"]), #site-content li:not(.sr-only):not([data-sr-hero-item="true"]), #site-content blockquote:not([data-sr-hero-item="true"]), #site-content figcaption:not([data-sr-hero-item="true"])'
 const MEDIA_SELECTOR =
   '#site-content img:not([aria-hidden="true"]):not([data-sr-ignore="true"]), #site-content video:not([aria-hidden="true"]):not([data-sr-ignore="true"]), #site-content figure:not([data-sr-ignore="true"])'
 const TIMER_SELECTOR = '#site-content [data-sr-timer="true"]'
+const HERO_SELECTOR = '#site-content [data-sr-hero-item="true"]'
 
 type ScrollRevealInstance = {
   destroy: () => void
@@ -35,7 +36,7 @@ export const ScrollRevealProvider = () => {
       if (isCancelled) return
 
       if (!scrollRevealRef.current) {
-        const bottomTriggerOffsetPx = getBottomTriggerOffsetPx(window.innerWidth)
+        const bottomTriggerOffsetPx = getBottomTriggerOffsetPxFromVh(window.innerHeight)
 
         scrollRevealRef.current = ScrollReveal({
           mobile: true,
@@ -50,6 +51,7 @@ export const ScrollRevealProvider = () => {
 
       const sr = scrollRevealRef.current
       if (!sr) return
+      const heroDelayMs = getHeroDelayMs()
 
       sr.reveal(HEADING_SELECTOR, {
         delay: scrollRevealConfig.delayMs,
@@ -107,6 +109,19 @@ export const ScrollRevealProvider = () => {
         easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
         opacity: 0,
         origin: 'right',
+      })
+      sr.reveal(HERO_SELECTOR, {
+        delay: heroDelayMs,
+        distance: '28px',
+        duration: 900,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        interval: 60,
+        opacity: 0,
+        origin: 'bottom',
+        viewOffset: {
+          ...scrollRevealConfig.baseViewOffset,
+          bottom: 0,
+        },
       })
 
       requestAnimationFrame(() => {

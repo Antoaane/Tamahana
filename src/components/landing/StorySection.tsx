@@ -11,7 +11,10 @@ export const StorySection = ({ title, introduction }: StorySectionProps) => {
   }
 
   return (
-    <section className="relative isolate overflow-hidden bg-palette-1 py-8 font-cloud-lucent md:py-10 lg:py-20">
+    <section
+      id="story-section"
+      className="relative isolate overflow-hidden bg-palette-1 py-8 font-cloud-lucent md:py-10 lg:py-20"
+    >
       <NextImage
         alt=""
         aria-hidden

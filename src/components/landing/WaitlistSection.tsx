@@ -90,7 +90,10 @@ export const WaitlistSection = ({
   }
 
   return (
-    <section className="relative isolate overflow-hidden bg-palette-8 py-16 md:py-20 lg:py-24">
+    <section
+      id="waitlist-section"
+      className="relative isolate overflow-hidden bg-palette-8 py-16 md:py-20 lg:py-24"
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[url('/svgs/polynesian-patterns.svg')] bg-repeat opacity-[0.02] [background-size:clamp(52rem,95vw,132rem)_auto]"

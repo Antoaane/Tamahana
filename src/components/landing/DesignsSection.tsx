@@ -31,7 +31,10 @@ export function DesignsSection({ title, content, image }: DesignsSectionProps) {
   }
 
   return (
-    <section className="relative isolate overflow-hidden bg-palette-1 py-8 font-cloud-lucent md:py-10 lg:py-20">
+    <section
+      id="designs-section"
+      className="relative isolate overflow-hidden bg-palette-1 py-8 font-cloud-lucent md:py-10 lg:py-20"
+    >
       <div className="container relative">
         <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,30rem)_minmax(0,1fr)] lg:gap-16">
           <div className="mx-auto w-full max-w-[30rem] lg:mx-0">

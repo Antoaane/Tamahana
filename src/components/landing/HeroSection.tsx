@@ -180,7 +180,10 @@ export const HeroSection = ({
     countdown.seconds === 0
 
   return (
-    <section className="relative isolate flex h-dvh items-center overflow-hidden px-5 pb-24 pt-20 md:px-10 md:pb-28 md:pt-28 lg:px-16 lg:pt-32">
+    <section
+      id="hero-section"
+      className="relative isolate flex h-dvh items-center overflow-hidden px-5 pb-24 pt-20 md:px-10 md:pb-28 md:pt-28 lg:px-16 lg:pt-32"
+    >
       {mobileBackground ? (
         <NextImage
           alt={mobileBackground.alt}
@@ -214,7 +217,10 @@ export const HeroSection = ({
 
       <div className="relative z-10 mx-auto flex w-full max-w-275 h-full flex-col items-center justify-between text-center">
         {title ? (
-          <h1 className="relative mb-6 font-cinzel text-[clamp(2.35rem,12vw,3.5rem)] leading-[0.9] tracking-[0.025em] text-palette-1 sm:text-[clamp(3.9rem,15.5vw,10rem)] sm:leading-[0.87] sm:tracking-[0.05em]">
+          <h1
+            className="relative mb-6 font-cinzel text-[clamp(2.35rem,12vw,3.5rem)] leading-[0.9] tracking-[0.025em] text-palette-1 sm:text-[clamp(3.9rem,15.5vw,10rem)] sm:leading-[0.87] sm:tracking-[0.05em]"
+            data-sr-hero-item="true"
+          >
             <span className="block whitespace-pre-line uppercase relative z-1 translate-y-[calc(clamp(2.35rem,12vw,3.5rem)*0.36)] sm:translate-y-[calc(clamp(3.9rem,15.5vw,10rem)*0.4)]">
               {title}
             </span>
@@ -226,19 +232,31 @@ export const HeroSection = ({
 
         <div className="flex flex-col items-center gap-6">
           {subtitle ? (
-            <p className="whitespace-pre-line font-baskervville text-[clamp(2.1rem,3.9vw,3.4rem)] italic leading-tight text-palette-1/95">
+            <p
+              className="whitespace-pre-line font-baskervville text-[clamp(2.1rem,3.9vw,3.4rem)] italic leading-tight text-palette-1/95"
+              data-sr-hero-item="true"
+            >
               {subtitle}
             </p>
           ) : null}
 
           {countdown ? (
-            <div className="mt-5 rounded-full bg-black/25 px-5 py-2 backdrop-blur-sm">
+            <div
+              className="mt-5 rounded-full bg-black/25 px-5 py-2 backdrop-blur-sm"
+              data-sr-hero-item="true"
+            >
               {isFinished ? (
-                <p className="font-cinzel text-sm uppercase tracking-[0.28em] text-palette-1/90">
+                <p
+                  className="font-cinzel text-sm uppercase tracking-[0.28em] text-palette-1/90"
+                  data-sr-hero-item="true"
+                >
                   Lancement en cours
                 </p>
               ) : (
-                <p className="font-cinzel text-sm uppercase tracking-[0.28em] text-palette-1/90">
+                <p
+                  className="font-cinzel text-sm uppercase tracking-[0.28em] text-palette-1/90"
+                  data-sr-hero-item="true"
+                >
                   {countdown.days}j {countdown.hours}h {countdown.minutes}m {countdown.seconds}s
                 </p>
               )}
