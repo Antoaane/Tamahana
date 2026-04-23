@@ -151,9 +151,8 @@ export const HeroSection = ({
     ).getTime()
   }, [launchDate, launchTime, launchTimezone])
 
-  const [countdown, setCountdown] = useState<CountdownParts | null>(
-    targetTime ? getCountdown(targetTime) : null,
-  )
+  // Keep SSR/CSR initial render deterministic to avoid hydration mismatches.
+  const [countdown, setCountdown] = useState<CountdownParts | null>(null)
 
   useEffect(() => {
     if (!targetTime) {

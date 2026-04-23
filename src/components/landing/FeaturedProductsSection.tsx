@@ -337,9 +337,8 @@ export const FeaturedProductsSection = ({
     ).getTime()
   }, [launchDate, launchTime, launchTimezone])
 
-  const [countdown, setCountdown] = useState<CountdownParts>(
-    targetTime ? getCountdown(targetTime) : DEFAULT_COUNTDOWN,
-  )
+  // Keep SSR/CSR initial render deterministic to avoid hydration mismatches.
+  const [countdown, setCountdown] = useState<CountdownParts | null>(null)
 
   useEffect(() => {
     if (!targetTime) {
@@ -354,11 +353,13 @@ export const FeaturedProductsSection = ({
     return () => window.clearInterval(interval)
   }, [targetTime])
 
+  const safeCountdown = countdown ?? DEFAULT_COUNTDOWN
+
   const timerItems = [
-    { label: 'Jours', value: countdown.days },
-    { label: 'Heures', value: countdown.hours },
-    { label: 'Minutes', value: countdown.minutes },
-    { label: 'Secondes', value: countdown.seconds },
+    { label: 'Jours', value: safeCountdown.days },
+    { label: 'Heures', value: safeCountdown.hours },
+    { label: 'Minutes', value: safeCountdown.minutes },
+    { label: 'Secondes', value: safeCountdown.seconds },
   ]
 
   const productsToDisplay = useMemo(() => normalizeProducts(items), [items])

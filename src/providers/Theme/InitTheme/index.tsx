@@ -1,4 +1,4 @@
-import React from 'react'
+import Script from 'next/script'
 
 import { defaultTheme, themeLocalStorageKey } from '../shared'
 
@@ -37,14 +37,13 @@ const INIT_THEME_SCRIPT = `
   })();
 `
 
-export const InitTheme: React.FC = () => {
+export const InitTheme = () => {
   return (
-    <script
-      dangerouslySetInnerHTML={{
-        __html: INIT_THEME_SCRIPT,
-      }}
+    <Script
       id="theme-script"
-      suppressHydrationWarning
-    />
+      strategy="beforeInteractive"
+    >
+      {INIT_THEME_SCRIPT}
+    </Script>
   )
 }
