@@ -239,7 +239,7 @@ export const HeroSection = ({
             </p>
           ) : null}
 
-          {countdown ? (
+          {/* {countdown ? (
             <div
               className="mt-5 rounded-full bg-black/25 px-5 py-2 backdrop-blur-sm"
               data-sr-hero-item="true"
@@ -260,7 +260,7 @@ export const HeroSection = ({
                 </p>
               )}
             </div>
-          ) : null}
+          ) : null} */}
         </div>
       </div>
 

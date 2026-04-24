@@ -196,7 +196,7 @@ export const WaitlistSection = ({
               <input name="anticsrf" type="hidden" value="true" />
 
               <button
-                className="w-full whitespace-pre-line bg-palette-3 px-7 py-4 text-center font-cloud-lucent text-xl leading-none text-palette-1 transition-colors hover:bg-palette-3/92 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-palette-3/45 disabled:cursor-not-allowed disabled:opacity-80"
+                className="w-full whitespace-pre-line bg-palette-text px-7 py-4 text-center font-cloud-lucent text-xl leading-none text-palette-1 transition-colors hover:bg-palette-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-palette-3/45 disabled:cursor-not-allowed disabled:opacity-80 cursor-pointer"
                 disabled={isSubmitting}
                 type="submit"
               >
