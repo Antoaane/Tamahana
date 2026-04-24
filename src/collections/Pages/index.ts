@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, FieldHook } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
@@ -8,7 +8,13 @@ import {
   FEATURED_PRODUCT_IMAGE_BACKGROUND_STORAGE_OPTIONS,
 } from '../../constants/featuredProductImageBackgrounds'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
+import { coerceLegacyTextToLexical } from '../../utilities/richText/plainTextToLexical'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
+
+const legacyRichTextHooks = {
+  afterRead: [(({ value }) => coerceLegacyTextToLexical(value)) as FieldHook],
+  beforeValidate: [(({ value }) => coerceLegacyTextToLexical(value)) as FieldHook],
+}
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -300,8 +306,9 @@ export const Pages: CollectionConfig<'pages'> = {
                 },
                 {
                   name: 'description',
-                  type: 'textarea',
+                  type: 'richText',
                   label: 'Description',
+                  hooks: legacyRichTextHooks,
                 },
                 {
                   name: 'buttonLabel',
@@ -310,8 +317,9 @@ export const Pages: CollectionConfig<'pages'> = {
                 },
                 {
                   name: 'successMessage',
-                  type: 'textarea',
+                  type: 'richText',
                   label: 'Message de confirmation',
+                  hooks: legacyRichTextHooks,
                 },
               ],
             },
@@ -336,8 +344,9 @@ export const Pages: CollectionConfig<'pages'> = {
                 },
                 {
                   name: 'introduction',
-                  type: 'textarea',
+                  type: 'richText',
                   label: 'Introduction',
+                  hooks: legacyRichTextHooks,
                 },
               ],
             },
@@ -362,8 +371,9 @@ export const Pages: CollectionConfig<'pages'> = {
                 },
                 {
                   name: 'content',
-                  type: 'textarea',
+                  type: 'richText',
                   label: 'Contenu',
+                  hooks: legacyRichTextHooks,
                 },
                 {
                   name: 'image',
@@ -394,8 +404,9 @@ export const Pages: CollectionConfig<'pages'> = {
                 },
                 {
                   name: 'content',
-                  type: 'textarea',
+                  type: 'richText',
                   label: 'Contenu',
+                  hooks: legacyRichTextHooks,
                 },
                 {
                   name: 'image',

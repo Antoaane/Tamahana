@@ -5,6 +5,7 @@ import { MaterialsSection, type MaterialsSectionProps } from './MaterialsSection
 import { SocialLinksSection, type SocialLinksSectionProps } from './SocialLinksSection'
 import { StorySection } from './StorySection'
 import { WaitlistSection } from './WaitlistSection'
+import type { TextContent } from './richText'
 import type { Media } from '@/payload-types'
 
 type MediaRelation = (number | null) | Media
@@ -25,22 +26,22 @@ type LandingContent = {
   waitlist?: {
     image?: MediaRelation
     title?: string | null
-    description?: string | null
+    description?: TextContent
     buttonLabel?: string | null
-    successMessage?: string | null
+    successMessage?: TextContent
   } | null
   story?: {
     title?: string | null
-    introduction?: string | null
+    introduction?: TextContent
   } | null
   materials?: {
     title?: string | null
-    content?: string | null
+    content?: TextContent
     image?: MediaRelation
   } | null
   designs?: {
     title?: string | null
-    content?: string | null
+    content?: TextContent
     image?: MediaRelation
   } | null
   socialLinks?: SocialLinksSectionProps | null

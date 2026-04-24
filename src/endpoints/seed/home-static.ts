@@ -1,4 +1,5 @@
 import type { RequiredDataFromCollectionSlug } from 'payload'
+import { paragraphRichText } from './richText'
 
 export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
   title: 'Home',
@@ -25,21 +26,21 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
     },
     waitlist: {
       title: 'Liste d\'attente',
-      description: 'Inscrivez-vous pour etre informe du lancement.',
+      description: paragraphRichText('Inscrivez-vous pour etre informe du lancement.'),
       buttonLabel: 'Je m\'inscris',
-      successMessage: 'Merci pour votre inscription.',
+      successMessage: paragraphRichText('Merci pour votre inscription.'),
     },
     story: {
       title: 'Notre histoire',
-      introduction: 'Presentation de la marque.',
+      introduction: paragraphRichText('Presentation de la marque.'),
     },
     materials: {
       title: 'Nos matieres',
-      content: 'Informations sur les matieres.',
+      content: paragraphRichText('Informations sur les matieres.'),
     },
     designs: {
       title: 'Nos designs',
-      content: 'Informations sur les designs.',
+      content: paragraphRichText('Informations sur les designs.'),
     },
   },
 }

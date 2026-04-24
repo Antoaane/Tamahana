@@ -1,8 +1,10 @@
 import NextImage from 'next/image'
+import RichText from '@/components/RichText'
+import { isLexicalContent, type TextContent } from './richText'
 
 type StorySectionProps = {
   title?: string | null
-  introduction?: string | null
+  introduction?: TextContent
 }
 
 export const StorySection = ({ title, introduction }: StorySectionProps) => {
@@ -41,14 +43,26 @@ export const StorySection = ({ title, introduction }: StorySectionProps) => {
           ) : null}
 
           {introduction ? (
-            <p
-              className={[
-                title ? 'mt-6' : '',
-                'whitespace-pre-line text-base leading-relaxed md:text-base',
-              ].join(' ')}
-            >
-              {introduction}
-            </p>
+            isLexicalContent(introduction) ? (
+              <RichText
+                className={[
+                  title ? 'mt-6' : '',
+                  'text-base leading-relaxed md:text-base [&_p]:m-0 [&_p+*]:mt-4',
+                ].join(' ')}
+                data={introduction}
+                enableGutter={false}
+                enableProse={false}
+              />
+            ) : (
+              <p
+                className={[
+                  title ? 'mt-6' : '',
+                  'whitespace-pre-line text-base leading-relaxed md:text-base',
+                ].join(' ')}
+              >
+                {introduction}
+              </p>
+            )
           ) : null}
         </div>
       </div>

@@ -3,17 +3,19 @@
 import type { CSSProperties, FormEvent } from 'react'
 import { useId, useMemo, useRef, useState } from 'react'
 import NextImage from 'next/image'
+import RichText from '@/components/RichText'
 import type { Media } from '@/payload-types'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
+import { isLexicalContent, type TextContent } from './richText'
 
 type MediaRelation = (number | null) | Media
 
 type WaitlistSectionProps = {
   video?: MediaRelation
   title?: string | null
-  description?: string | null
+  description?: TextContent
   buttonLabel?: string | null
-  successMessage?: string | null
+  successMessage?: TextContent
 }
 
 const DEFAULT_TITLE = 'LE 1ER MAI, UNE NOUVELLE AVENTURE COMMENCE'
@@ -65,8 +67,9 @@ export const WaitlistSection = ({
   )
 
   const resolvedTitle = title || DEFAULT_TITLE
-  const resolvedDescription = description || DEFAULT_DESCRIPTION
+  const resolvedDescription = description ?? DEFAULT_DESCRIPTION
   const resolvedButtonLabel = buttonLabel || DEFAULT_BUTTON_LABEL
+  const resolvedSuccessMessage = successMessage ?? null
   const resolvedVideoSource = resolveVideoSource(video)
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -134,9 +137,20 @@ export const WaitlistSection = ({
               {resolvedTitle}
             </h2>
 
-            <p className="mt-8 whitespace-pre-line font-cloud-lucent text-lg leading-tight text-palette-text">
-              {resolvedDescription}
-            </p>
+            {resolvedDescription ? (
+              isLexicalContent(resolvedDescription) ? (
+                <RichText
+                  className="mt-8 font-cloud-lucent text-lg leading-tight text-palette-text [&_p]:m-0 [&_p+*]:mt-3"
+                  data={resolvedDescription}
+                  enableGutter={false}
+                  enableProse={false}
+                />
+              ) : (
+                <p className="mt-8 whitespace-pre-line font-cloud-lucent text-lg leading-tight text-palette-text">
+                  {resolvedDescription}
+                </p>
+              )
+            ) : null}
 
             <form
               action="https://assets.mailerlite.com/jsonp/2283434/forms/185369647657256075/subscribe"
@@ -197,13 +211,23 @@ export const WaitlistSection = ({
               title="Soumission liste d'attente"
             />
 
-            {didSubmit && successMessage ? (
-              <p
-                aria-live="polite"
-                className="mt-4 whitespace-pre-line font-cloud-lucent text-base text-palette-3/85"
-              >
-                {successMessage}
-              </p>
+            {didSubmit && resolvedSuccessMessage ? (
+              isLexicalContent(resolvedSuccessMessage) ? (
+                <RichText
+                  aria-live="polite"
+                  className="mt-4 font-cloud-lucent text-base text-palette-3/85 [&_p]:m-0 [&_p+*]:mt-2"
+                  data={resolvedSuccessMessage}
+                  enableGutter={false}
+                  enableProse={false}
+                />
+              ) : (
+                <p
+                  aria-live="polite"
+                  className="mt-4 whitespace-pre-line font-cloud-lucent text-base text-palette-3/85"
+                >
+                  {resolvedSuccessMessage}
+                </p>
+              )
             ) : null}
           </div>
         </div>

@@ -1,10 +1,12 @@
 import NextImage from 'next/image'
+import RichText from '@/components/RichText'
 import type { Media } from '@/payload-types'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
+import { isLexicalContent, type TextContent } from './richText'
 
 export interface MaterialsSectionProps {
   title?: string | null
-  content?: string | null
+  content?: TextContent
   image?: (number | null) | Media
 }
 
@@ -55,14 +57,26 @@ export function MaterialsSection({ title, content, image }: MaterialsSectionProp
               ) : null}
 
               {content ? (
-                <p
-                  className={[
-                    title ? 'mt-6' : '',
-                    'whitespace-pre-line text-base leading-relaxed md:text-base',
-                  ].join(' ')}
-                >
-                  {content}
-                </p>
+                isLexicalContent(content) ? (
+                  <RichText
+                    className={[
+                      title ? 'mt-6' : '',
+                      'text-base leading-relaxed md:text-base [&_p]:m-0 [&_p+*]:mt-4',
+                    ].join(' ')}
+                    data={content}
+                    enableGutter={false}
+                    enableProse={false}
+                  />
+                ) : (
+                  <p
+                    className={[
+                      title ? 'mt-6' : '',
+                      'whitespace-pre-line text-base leading-relaxed md:text-base',
+                    ].join(' ')}
+                  >
+                    {content}
+                  </p>
+                )
               ) : null}
             </div>
           </div>

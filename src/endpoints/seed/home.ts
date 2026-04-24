@@ -1,5 +1,6 @@
 import type { RequiredDataFromCollectionSlug } from 'payload'
 import type { Media } from '@/payload-types'
+import { paragraphRichText } from './richText'
 
 type HomeArgs = {
   heroImage: Media
@@ -43,22 +44,22 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
       waitlist: {
         image: metaImage.id,
         title: 'Liste d\'attente',
-        description: 'Inscrivez-vous pour etre informe du lancement.',
+        description: paragraphRichText('Inscrivez-vous pour etre informe du lancement.'),
         buttonLabel: 'Je m\'inscris',
-        successMessage: 'Merci, votre inscription a bien ete prise en compte.',
+        successMessage: paragraphRichText('Merci, votre inscription a bien ete prise en compte.'),
       },
       story: {
         title: 'Notre histoire',
-        introduction: 'Une marque creee entre la Nouvelle-Caledonie et la France.',
+        introduction: paragraphRichText('Une marque creee entre la Nouvelle-Caledonie et la France.'),
       },
       materials: {
         title: 'Nos matieres',
-        content: 'Des matieres selectionnees pour le confort et la durabilite.',
+        content: paragraphRichText('Des matieres selectionnees pour le confort et la durabilite.'),
         image: metaImage.id,
       },
       designs: {
         title: 'Nos designs',
-        content: 'Des designs penses pour le quotidien et l\'identite.',
+        content: paragraphRichText('Des designs penses pour le quotidien et l\'identite.'),
         image: metaImage.id,
       },
     },
