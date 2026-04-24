@@ -1,9 +1,11 @@
 'use client'
 
 import type { Media } from '@/payload-types'
+import type { CSSProperties } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { Heart } from 'lucide-react'
 import NextImage from 'next/image'
+import { Swiper, SwiperSlide } from 'swiper/react'
 import {
   DEFAULT_FEATURED_PRODUCT_IMAGE_BACKGROUND,
   FEATURED_PRODUCT_IMAGE_BACKGROUND_CSS,
@@ -60,12 +62,17 @@ const FALLBACK_PRODUCTS: FeaturedProductItem[] = [
 ]
 
 const PRODUCT_LIKED_STORAGE_KEY = 'tamahana:liked-products:v1'
-const PRODUCT_LIKES_STORAGE_KEY = 'tamahana:product-like-counts:v1'
 
 const TIMER_GRADIENT = {
   backgroundImage:
     'linear-gradient(180deg, var(--palette-3) 0%, var(--palette-3) 50%, rgb(from var(--palette-3) r g b / 0) 100%)',
 }
+
+const SWIPER_HORIZONTAL_MASK_STYLE = {
+  WebkitMaskImage:
+    'linear-gradient(to right, transparent 0%, black 2.5%, black 97.5%, transparent 100%)',
+  maskImage: 'linear-gradient(to right, transparent 0%, black 2.5%, black 97.5%, transparent 100%)',
+} satisfies CSSProperties
 
 const resolveMediaSource = (media?: (number | null) | Media) => {
   if (!media || typeof media !== 'object') return null
@@ -203,25 +210,6 @@ const readBooleanMap = (key: string): Record<string, boolean> => {
   }
 }
 
-const readNumberMap = (key: string): Record<string, number> => {
-  try {
-    const value = window.localStorage.getItem(key)
-    if (!value) return {}
-
-    const parsed = JSON.parse(value) as unknown
-    if (!parsed || typeof parsed !== 'object') return {}
-
-    return Object.entries(parsed).reduce<Record<string, number>>((acc, [entryKey, entryValue]) => {
-      if (typeof entryValue === 'number' && Number.isFinite(entryValue)) {
-        acc[entryKey] = Math.max(0, Math.floor(entryValue))
-      }
-      return acc
-    }, {})
-  } catch {
-    return {}
-  }
-}
-
 const writeStorage = (key: string, value: unknown) => {
   try {
     window.localStorage.setItem(key, JSON.stringify(value))
@@ -235,11 +223,11 @@ const normalizeProducts = (products?: FeaturedProductItem[] | null) => {
     return Boolean(item?.name || item?.collection || item?.price || item?.image || item?.link)
   })
 
-  if (items.length >= 2) {
-    return items.slice(0, 2)
+  if (items.length > 0) {
+    return items
   }
 
-  return [...items, ...FALLBACK_PRODUCTS.slice(0, 2 - items.length)]
+  return FALLBACK_PRODUCTS
 }
 
 const getProductLikeKey = (product: FeaturedProductItem, index: number): string => {
@@ -250,58 +238,121 @@ const getProductLikeKey = (product: FeaturedProductItem, index: number): string 
   return `product:fallback:${index}:${product.name ?? ''}:${product.collection ?? ''}`
 }
 
+const toSafeLikeCount = (value: unknown): number => {
+  const normalized = typeof value === 'string' ? Number(value) : value
+  if (typeof normalized !== 'number' || !Number.isFinite(normalized)) return 0
+  return Math.max(0, Math.floor(normalized))
+}
+
+const fetchBackendLikes = async (productLikeKey: string, signal?: AbortSignal): Promise<number> => {
+  const searchParams = new URLSearchParams({ productKey: productLikeKey })
+  const response = await fetch(`/api/product-likes?${searchParams.toString()}`, {
+    method: 'GET',
+    cache: 'no-store',
+    signal,
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch likes')
+  }
+
+  const data = (await response.json()) as { likes?: number }
+  return toSafeLikeCount(data.likes)
+}
+
+const updateBackendLikes = async (
+  productLikeKey: string,
+  action: 'like' | 'unlike',
+): Promise<number> => {
+  const response = await fetch('/api/product-likes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      action,
+      productKey: productLikeKey,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to update likes')
+  }
+
+  const data = (await response.json()) as { likes?: number }
+  return toSafeLikeCount(data.likes)
+}
+
 const ProductLikeButton = ({ productLikeKey }: { productLikeKey: string }) => {
   const [liked, setLiked] = useState(false)
   const [likes, setLikes] = useState(0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     const likedProducts = readBooleanMap(PRODUCT_LIKED_STORAGE_KEY)
-    const likeCounts = readNumberMap(PRODUCT_LIKES_STORAGE_KEY)
-
     setLiked(likedProducts[productLikeKey] === true)
-    setLikes(likeCounts[productLikeKey] ?? 0)
-  }, [productLikeKey])
 
-  const handleLike = () => {
-    const likedProducts = readBooleanMap(PRODUCT_LIKED_STORAGE_KEY)
-    const likeCounts = readNumberMap(PRODUCT_LIKES_STORAGE_KEY)
-    const isCurrentlyLiked = likedProducts[productLikeKey] === true
-    const currentLikes = likeCounts[productLikeKey] ?? 0
+    const controller = new AbortController()
 
-    if (isCurrentlyLiked) {
-      const nextLikes = Math.max(0, currentLikes - 1)
-      delete likedProducts[productLikeKey]
-
-      if (nextLikes === 0) {
-        delete likeCounts[productLikeKey]
-      } else {
-        likeCounts[productLikeKey] = nextLikes
+    const loadLikes = async () => {
+      try {
+        const backendLikes = await fetchBackendLikes(productLikeKey, controller.signal)
+        setLikes(backendLikes)
+      } catch {
+        // no-op: keep current likes value if loading fails
       }
-
-      writeStorage(PRODUCT_LIKED_STORAGE_KEY, likedProducts)
-      writeStorage(PRODUCT_LIKES_STORAGE_KEY, likeCounts)
-
-      setLiked(false)
-      setLikes(nextLikes)
-      return
     }
 
-    const nextLikes = currentLikes + 1
+    void loadLikes()
 
-    likedProducts[productLikeKey] = true
-    likeCounts[productLikeKey] = nextLikes
+    return () => controller.abort()
+  }, [productLikeKey])
 
+  const handleLike = async () => {
+    if (isSubmitting) return
+
+    const likedProducts = readBooleanMap(PRODUCT_LIKED_STORAGE_KEY)
+    const previousLiked = likedProducts[productLikeKey] === true
+    const previousLikes = likes
+    const nextLiked = !previousLiked
+    const optimisticLikes = Math.max(0, previousLikes + (nextLiked ? 1 : -1))
+
+    if (nextLiked) {
+      likedProducts[productLikeKey] = true
+    } else {
+      delete likedProducts[productLikeKey]
+    }
     writeStorage(PRODUCT_LIKED_STORAGE_KEY, likedProducts)
-    writeStorage(PRODUCT_LIKES_STORAGE_KEY, likeCounts)
 
-    setLiked(true)
-    setLikes(nextLikes)
+    setLiked(nextLiked)
+    setLikes(optimisticLikes)
+    setIsSubmitting(true)
+
+    try {
+      const backendLikes = await updateBackendLikes(productLikeKey, nextLiked ? 'like' : 'unlike')
+      setLikes(backendLikes)
+    } catch {
+      const rollbackLikedProducts = readBooleanMap(PRODUCT_LIKED_STORAGE_KEY)
+      if (previousLiked) {
+        rollbackLikedProducts[productLikeKey] = true
+      } else {
+        delete rollbackLikedProducts[productLikeKey]
+      }
+      writeStorage(PRODUCT_LIKED_STORAGE_KEY, rollbackLikedProducts)
+
+      setLiked(previousLiked)
+      setLikes(previousLikes)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <button
       aria-label={liked ? 'Retirer le like du produit' : 'Liker ce produit'}
+      aria-busy={isSubmitting}
       className="inline-flex items-center gap-2 text-palette-3/90"
+      disabled={isSubmitting}
       onClick={handleLike}
       type="button"
     >
@@ -326,7 +377,7 @@ const WaitlistProductCard = ({
   const productImageBackground = resolveProductImageBackground(product.imageBackground)
 
   return (
-    <article className="border-2 border-palette-4 bg-palette-2 text-palette-3">
+    <article className="flex h-full flex-col border-2 border-palette-4 bg-palette-2 text-palette-3">
       <div
         className={`relative aspect-square w-full overflow-hidden ${shouldApplyPngBackground ? '' : 'bg-palette-1/80'}`}
         style={shouldApplyPngBackground ? { background: productImageBackground } : undefined}
@@ -334,9 +385,9 @@ const WaitlistProductCard = ({
         {image ? (
           <NextImage
             alt={image.alt || product.name || 'Produit'}
-            className="object-cover"
+            className="object-cover p-[5%]"
             fill
-            sizes="(min-width: 768px) 23rem, 100vw"
+            sizes="(min-width: 1536px) 18rem, (min-width: 1280px) 20rem, (min-width: 1024px) 26vw, (min-width: 768px) 42vw, 78vw"
             src={image.src}
           />
         ) : (
@@ -344,7 +395,7 @@ const WaitlistProductCard = ({
         )}
       </div>
 
-      <div className="flex min-h-44 flex-col px-5 py-4 md:px-6 md:py-5">
+      <div className="flex min-h-44 flex-1 flex-col px-5 py-4 md:px-6 md:py-5">
         <h3 className="whitespace-pre-line font-baskervville text-2xl">
           {product.name || 'Nom de la pièce'}
         </h3>
@@ -415,6 +466,42 @@ export const FeaturedProductsSection = ({
   ]
 
   const productsToDisplay = useMemo(() => normalizeProducts(items), [items])
+  const swiperBreakpoints = useMemo(() => {
+    const clampSlides = (slides: number) => {
+      return Math.max(1, Math.min(productsToDisplay.length, slides))
+    }
+
+    return {
+      0: {
+        slidesPerView: clampSlides(1.08),
+        spaceBetween: 14,
+      },
+      480: {
+        slidesPerView: clampSlides(1.24),
+        spaceBetween: 16,
+      },
+      640: {
+        slidesPerView: clampSlides(1.45),
+        spaceBetween: 18,
+      },
+      768: {
+        slidesPerView: clampSlides(2.05),
+        spaceBetween: 20,
+      },
+      1024: {
+        slidesPerView: clampSlides(2.65),
+        spaceBetween: 22,
+      },
+      1280: {
+        slidesPerView: clampSlides(3.2),
+        spaceBetween: 24,
+      },
+      1536: {
+        slidesPerView: clampSlides(4),
+        spaceBetween: 24,
+      },
+    }
+  }, [productsToDisplay.length])
 
   return (
     <section
@@ -462,18 +549,26 @@ export const FeaturedProductsSection = ({
           </div>
         </div>
 
-        <div className="mx-auto mt-12 grid w-full max-w-[49rem] gap-5 md:mt-24 md:grid-cols-2 md:gap-6">
-          {productsToDisplay.map((product, index) => {
-            const productLikeKey = getProductLikeKey(product, index)
+        <div className="mx-auto mt-12 w-full max-w-[76rem] md:mt-24">
+          <Swiper
+            className="[&_.swiper-wrapper]:items-stretch [&_.swiper-slide]:h-auto"
+            grabCursor
+            style={SWIPER_HORIZONTAL_MASK_STYLE}
+            watchOverflow
+            slidesOffsetBefore={16}
+            slidesOffsetAfter={16}
+            breakpoints={swiperBreakpoints}
+          >
+            {productsToDisplay.map((product, index) => {
+              const productLikeKey = getProductLikeKey(product, index)
 
-            return (
-              <WaitlistProductCard
-                key={productLikeKey}
-                product={product}
-                productLikeKey={productLikeKey}
-              />
-            )
-          })}
+              return (
+                <SwiperSlide key={productLikeKey}>
+                  <WaitlistProductCard product={product} productLikeKey={productLikeKey} />
+                </SwiperSlide>
+              )
+            })}
+          </Swiper>
         </div>
       </div>
 
