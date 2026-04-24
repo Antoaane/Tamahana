@@ -4,11 +4,17 @@ import type { Media } from '@/payload-types'
 import { useEffect, useMemo, useState } from 'react'
 import { Heart } from 'lucide-react'
 import NextImage from 'next/image'
+import {
+  DEFAULT_FEATURED_PRODUCT_IMAGE_BACKGROUND,
+  FEATURED_PRODUCT_IMAGE_BACKGROUND_CSS,
+  type FeaturedProductImageBackground,
+} from '@/constants/featuredProductImageBackgrounds'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 
 export type FeaturedProductItem = {
   id?: string | null
   image?: (number | null) | Media
+  imageBackground?: FeaturedProductImageBackground | null
   name?: string | null
   collection?: string | null
   price?: string | null
@@ -69,6 +75,29 @@ const resolveMediaSource = (media?: (number | null) | Media) => {
     src: getMediaUrl(media.url, media.updatedAt),
     alt: media.alt || '',
   }
+}
+
+const isPngMedia = (media?: (number | null) | Media) => {
+  if (!media || typeof media !== 'object') return false
+
+  const mimeType = media.mimeType?.toLowerCase()
+  if (mimeType === 'image/png') {
+    return true
+  }
+
+  const filename = media.filename?.toLowerCase() ?? ''
+  const url = media.url?.toLowerCase() ?? ''
+  return filename.endsWith('.png') || url.includes('.png')
+}
+
+const resolveProductImageBackground = (
+  background?: FeaturedProductImageBackground | null,
+): string => {
+  if (background && background in FEATURED_PRODUCT_IMAGE_BACKGROUND_CSS) {
+    return FEATURED_PRODUCT_IMAGE_BACKGROUND_CSS[background]
+  }
+
+  return FEATURED_PRODUCT_IMAGE_BACKGROUND_CSS[DEFAULT_FEATURED_PRODUCT_IMAGE_BACKGROUND]
 }
 
 const parseDateParts = (dateValue?: string | null) => {
@@ -234,11 +263,30 @@ const ProductLikeButton = ({ productLikeKey }: { productLikeKey: string }) => {
   }, [productLikeKey])
 
   const handleLike = () => {
-    if (liked) return
-
-    const nextLikes = likes + 1
     const likedProducts = readBooleanMap(PRODUCT_LIKED_STORAGE_KEY)
     const likeCounts = readNumberMap(PRODUCT_LIKES_STORAGE_KEY)
+    const isCurrentlyLiked = likedProducts[productLikeKey] === true
+    const currentLikes = likeCounts[productLikeKey] ?? 0
+
+    if (isCurrentlyLiked) {
+      const nextLikes = Math.max(0, currentLikes - 1)
+      delete likedProducts[productLikeKey]
+
+      if (nextLikes === 0) {
+        delete likeCounts[productLikeKey]
+      } else {
+        likeCounts[productLikeKey] = nextLikes
+      }
+
+      writeStorage(PRODUCT_LIKED_STORAGE_KEY, likedProducts)
+      writeStorage(PRODUCT_LIKES_STORAGE_KEY, likeCounts)
+
+      setLiked(false)
+      setLikes(nextLikes)
+      return
+    }
+
+    const nextLikes = currentLikes + 1
 
     likedProducts[productLikeKey] = true
     likeCounts[productLikeKey] = nextLikes
@@ -252,9 +300,8 @@ const ProductLikeButton = ({ productLikeKey }: { productLikeKey: string }) => {
 
   return (
     <button
-      aria-label={liked ? 'Produit liké' : 'Liker ce produit'}
-      className="inline-flex items-center gap-2 text-palette-3/90 disabled:cursor-default"
-      disabled={liked}
+      aria-label={liked ? 'Retirer le like du produit' : 'Liker ce produit'}
+      className="inline-flex items-center gap-2 text-palette-3/90"
       onClick={handleLike}
       type="button"
     >
@@ -275,10 +322,15 @@ const WaitlistProductCard = ({
   productLikeKey: string
 }) => {
   const image = resolveMediaSource(product.image)
+  const shouldApplyPngBackground = image ? isPngMedia(product.image) : false
+  const productImageBackground = resolveProductImageBackground(product.imageBackground)
 
   return (
     <article className="border-2 border-palette-4 bg-palette-2 text-palette-3">
-      <div className="relative aspect-square w-full overflow-hidden bg-palette-1/80">
+      <div
+        className={`relative aspect-square w-full overflow-hidden ${shouldApplyPngBackground ? '' : 'bg-palette-1/80'}`}
+        style={shouldApplyPngBackground ? { background: productImageBackground } : undefined}
+      >
         {image ? (
           <NextImage
             alt={image.alt || product.name || 'Produit'}
@@ -424,6 +476,20 @@ export const FeaturedProductsSection = ({
           })}
         </div>
       </div>
+
+      <div
+        className="absolute inset-x-0 bottom-0 z-20 h-3 bg-palette-3/75"
+        style={{
+          WebkitMaskImage: 'url(/svgs/polynesian-shark-teeth.svg)',
+          maskImage: 'url(/svgs/polynesian-shark-teeth.svg)',
+          WebkitMaskPosition: 'center bottom',
+          maskPosition: 'center bottom',
+          WebkitMaskRepeat: 'repeat-x',
+          maskRepeat: 'repeat-x',
+          WebkitMaskSize: 'auto 100%',
+          maskSize: 'auto 100%',
+        }}
+      />
     </section>
   )
 }

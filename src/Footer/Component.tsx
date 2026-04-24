@@ -30,7 +30,7 @@ export async function Footer() {
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[url('/svgs/polynesian-patterns.svg')] bg-repeat opacity-[0.025] [background-size:clamp(48rem,95vw,120rem)_auto]"
+        className="pointer-events-none absolute inset-0 bg-[url('/svgs/polynesian-patterns.svg')] bg-repeat opacity-[0.0125] [background-size:clamp(48rem,95vw,120rem)_auto]"
       />
 
       <div className="container relative py-12 md:py-14 lg:py-16">

@@ -181,7 +181,7 @@ export const HeroSection = ({
   return (
     <section
       id="hero-section"
-      className="relative isolate flex h-dvh items-center overflow-hidden px-5 pb-24 pt-20 md:px-10 md:pb-28 md:pt-28 lg:px-16 lg:pt-32"
+      className="relative isolate flex h-dvh items-center overflow-hidden px-5 pb-24 pt-[25dvh] sm:pt-20 md:px-10 md:pb-28 md:pt-28 lg:px-16 lg:pt-32"
     >
       {mobileBackground ? (
         <NextImage
@@ -232,7 +232,7 @@ export const HeroSection = ({
         <div className="flex flex-col items-center gap-6">
           {subtitle ? (
             <p
-              className="whitespace-pre-line font-baskervville text-[clamp(2.1rem,3.9vw,3.4rem)] italic leading-tight text-palette-1/95"
+              className="whitespace-pre-line font-baskervville text-2xl sm:text-4xl italic leading-tight text-palette-1/95"
               data-sr-hero-item="true"
             >
               {subtitle}

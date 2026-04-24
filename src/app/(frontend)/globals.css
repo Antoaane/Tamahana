@@ -155,7 +155,7 @@
   }
 
   .hero-background-dim-overlay {
-    --hero-dim-opacity: 0.25;
+    --hero-dim-opacity: 0.40;
     position: absolute;
     inset: 0;
     z-index: 5;
@@ -187,7 +187,7 @@
     }
 
     .hero-background-dim-overlay {
-      --hero-dim-opacity: 0.25;
+      --hero-dim-opacity: 0.40;
     }
   }
 
@@ -359,13 +359,7 @@
 }
 
 html {
-  opacity: 0;
   scroll-behavior: smooth;
-}
-
-html[data-theme='dark'],
-html[data-theme='light'] {
-  opacity: initial;
 }
 
 @media (prefers-reduced-motion: reduce) {

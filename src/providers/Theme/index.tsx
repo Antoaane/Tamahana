@@ -15,6 +15,27 @@ const initialContext: ThemeContextType = {
 
 const ThemeContext = createContext(initialContext)
 
+const readStoredTheme = (): Theme | null => {
+  try {
+    const preference = window.localStorage.getItem(themeLocalStorageKey)
+    return themeIsValid(preference) ? preference : null
+  } catch {
+    return null
+  }
+}
+
+const writeStoredTheme = (themeToSet: Theme | null) => {
+  try {
+    if (themeToSet === null) {
+      window.localStorage.removeItem(themeLocalStorageKey)
+    } else {
+      window.localStorage.setItem(themeLocalStorageKey, themeToSet)
+    }
+  } catch {
+    // no-op
+  }
+}
+
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setThemeState] = useState<Theme | undefined>(
     canUseDOM ? (document.documentElement.getAttribute('data-theme') as Theme) : undefined,
@@ -22,22 +43,23 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const setTheme = useCallback((themeToSet: Theme | null) => {
     if (themeToSet === null) {
-      window.localStorage.removeItem(themeLocalStorageKey)
+      writeStoredTheme(null)
       const implicitPreference = getImplicitPreference()
-      document.documentElement.setAttribute('data-theme', implicitPreference || '')
-      if (implicitPreference) setThemeState(implicitPreference)
+      const resolvedTheme = implicitPreference || defaultTheme
+      document.documentElement.setAttribute('data-theme', resolvedTheme)
+      setThemeState(resolvedTheme)
     } else {
       setThemeState(themeToSet)
-      window.localStorage.setItem(themeLocalStorageKey, themeToSet)
+      writeStoredTheme(themeToSet)
       document.documentElement.setAttribute('data-theme', themeToSet)
     }
   }, [])
 
   useEffect(() => {
     let themeToSet: Theme = defaultTheme
-    const preference = window.localStorage.getItem(themeLocalStorageKey)
+    const preference = readStoredTheme()
 
-    if (themeIsValid(preference)) {
+    if (preference) {
       themeToSet = preference
     } else {
       const implicitPreference = getImplicitPreference()

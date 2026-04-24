@@ -124,13 +124,13 @@ export const WaitlistSection = ({
             <NextImage
               alt=""
               aria-hidden
-              className="size-48"
+              className="sm:size-24 md:size-36 lg:size-48"
               height={68}
               src="/svgs/turtle.svg"
               width={68}
             />
 
-            <h2 className="mt-5 max-w-[16ch] whitespace-pre-line font-cinzel text-[clamp(2rem,3.3vw,3.75rem)] leading-[1.25] tracking-[0.03em] text-palette-text uppercase">
+            <h2 className="mt-5 w-full whitespace-pre-line font-cinzel text-[clamp(1.5rem,1.65vw,1.925rem)] leading-[1.25] tracking-[0.03em] text-palette-text uppercase">
               {resolvedTitle}
             </h2>
 
@@ -208,6 +208,19 @@ export const WaitlistSection = ({
           </div>
         </div>
       </div>
+      <div
+        className="absolute inset-x-0 bottom-0 z-20 h-3 bg-palette-3/75"
+        style={{
+          WebkitMaskImage: 'url(/svgs/polynesian-shark-teeth.svg)',
+          maskImage: 'url(/svgs/polynesian-shark-teeth.svg)',
+          WebkitMaskPosition: 'center bottom',
+          maskPosition: 'center bottom',
+          WebkitMaskRepeat: 'repeat-x',
+          maskRepeat: 'repeat-x',
+          WebkitMaskSize: 'auto 100%',
+          maskSize: 'auto 100%',
+        }}
+      />
     </section>
   )
 }

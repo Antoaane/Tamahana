@@ -183,6 +183,25 @@ export interface Page {
       items?:
         | {
             image?: (number | null) | Media;
+            /**
+             * Choisis un gradient lie aux palettes du site. Le fond est applique uniquement quand l'image est un PNG transparent.
+             */
+            imageBackground?:
+              | (
+                  | 'palette-1-2'
+                  | 'palette-2-3'
+                  | 'palette-3-4'
+                  | 'palette-4-5'
+                  | 'palette-5-6'
+                  | 'palette-6-7'
+                  | 'palette-7-8'
+                  | 'palette-8-1'
+                  | 'sable'
+                  | 'ivoire'
+                  | 'lagon'
+                  | 'nuit'
+                )
+              | null;
             name?: string | null;
             collection?: string | null;
             price?: string | null;
@@ -218,7 +237,7 @@ export interface Page {
         | {
             name: string;
             link: string;
-            icon?: ('instagram' | 'facebook' | 'x' | 'youtube' | 'linkedin' | 'website') | null;
+            icon?: ('instagram' | 'facebook' | 'x' | 'tiktok' | 'youtube' | 'linkedin' | 'website') | null;
             id?: string | null;
           }[]
         | null;
@@ -930,6 +949,7 @@ export interface PagesSelect<T extends boolean = true> {
                 | T
                 | {
                     image?: T;
+                    imageBackground?: T;
                     name?: T;
                     collection?: T;
                     price?: T;

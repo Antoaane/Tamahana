@@ -1,7 +1,7 @@
-import type { LucideIcon } from 'lucide-react'
+import type { LucideIcon, LucideProps } from 'lucide-react'
 import { Facebook, Globe, Instagram, Linkedin, Twitter, Youtube } from 'lucide-react'
 
-export type SocialIcon = 'instagram' | 'facebook' | 'x' | 'youtube' | 'linkedin' | 'website'
+export type SocialIcon = 'instagram' | 'facebook' | 'x' | 'tiktok' | 'youtube' | 'linkedin' | 'website'
 
 export type SocialLinkItem = {
   name?: string | null
@@ -16,10 +16,26 @@ export type SocialLinksSectionProps = {
 
 const DEFAULT_TITLE = 'Suivez-nous'
 
+const TikTokIcon = ((props: LucideProps) => (
+  <svg
+    aria-hidden
+    fill="none"
+    stroke="currentColor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    viewBox="0 0 24 24"
+    {...props}
+  >
+    <path d="M14 3v10.2a3.8 3.8 0 1 1-3.2-3.74" />
+    <path d="M14 7.8a5.8 5.8 0 0 0 4 1.6" />
+  </svg>
+)) as LucideIcon
+
 const ICONS: Record<SocialIcon, LucideIcon> = {
   instagram: Instagram,
   facebook: Facebook,
   x: Twitter,
+  tiktok: TikTokIcon,
   youtube: Youtube,
   linkedin: Linkedin,
   website: Globe,
@@ -29,6 +45,7 @@ const DEFAULT_LABELS: Record<SocialIcon, string> = {
   instagram: 'Instagram',
   facebook: 'Facebook',
   x: 'X',
+  tiktok: 'TikTok',
   youtube: 'YouTube',
   linkedin: 'LinkedIn',
   website: 'Site web',
@@ -82,11 +99,11 @@ export const SocialLinksSection = ({ title, items }: SocialLinksSectionProps) =>
   return (
     <section
       id="social-links-section"
-      className="relative isolate overflow-hidden border-t border-palette-4/30 bg-palette-2 py-10 md:py-12"
+      className="relative isolate overflow-hidden border-t border-palette-4/30 bg-palette-8 py-10 md:py-12"
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[url('/svgs/polynesian-patterns.svg')] bg-repeat opacity-[0.03] [background-size:clamp(44rem,90vw,120rem)_auto]"
+        className="pointer-events-none absolute inset-0 bg-repeat opacity-[0.03] [background-size:clamp(44rem,90vw,120rem)_auto]"
       />
 
       <div className="container relative">
@@ -94,7 +111,7 @@ export const SocialLinksSection = ({ title, items }: SocialLinksSectionProps) =>
           {title || DEFAULT_TITLE}
         </h2>
 
-        <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-8 flex gap-6 justify-center flex-wrap">
           {links.map((item, index) => {
             const Icon = ICONS[item.icon]
             const shouldOpenInNewTab = opensInNewTab(item.href)
@@ -102,7 +119,7 @@ export const SocialLinksSection = ({ title, items }: SocialLinksSectionProps) =>
             return (
               <li key={`${item.icon}-${item.href}-${index}`}>
                 <a
-                  className="group flex min-h-14 items-center justify-center gap-2.5 border border-palette-4/55 bg-palette-1 px-4 py-3 font-cloud-lucent text-lg text-palette-text transition-colors hover:bg-palette-3 hover:text-palette-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-palette-3/45"
+                  className="group flex min-h-14 w-56 items-center justify-center gap-2.5 border border-palette-4/55 bg-palette-1 px-4 py-3 font-cloud-lucent text-lg text-palette-text transition-colors hover:bg-palette-3 hover:text-palette-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-palette-3/45"
                   href={item.href}
                   rel={shouldOpenInNewTab ? 'noopener noreferrer' : undefined}
                   target={shouldOpenInNewTab ? '_blank' : undefined}

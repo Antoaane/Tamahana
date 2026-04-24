@@ -2,6 +2,11 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+import {
+  DEFAULT_FEATURED_PRODUCT_IMAGE_BACKGROUND,
+  FEATURED_PRODUCT_IMAGE_BACKGROUND_LEGACY_VALUES,
+  FEATURED_PRODUCT_IMAGE_BACKGROUND_STORAGE_OPTIONS,
+} from '../../constants/featuredProductImageBackgrounds'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 
@@ -204,6 +209,40 @@ export const Pages: CollectionConfig<'pages'> = {
                       type: 'upload',
                       relationTo: 'media',
                       label: 'Image',
+                    },
+                    {
+                      name: 'imageBackground',
+                      type: 'select',
+                      enumName: 'feat_prod_item_img_bg',
+                      label: 'Arriere-plan pour PNG transparent',
+                      defaultValue: DEFAULT_FEATURED_PRODUCT_IMAGE_BACKGROUND,
+                      options: FEATURED_PRODUCT_IMAGE_BACKGROUND_STORAGE_OPTIONS.map((option) => ({
+                        label: option.label,
+                        value: option.value,
+                      })),
+                      filterOptions: ({ options, siblingData }) => {
+                        const currentValue =
+                          siblingData &&
+                          typeof siblingData === 'object' &&
+                          'imageBackground' in siblingData &&
+                          typeof siblingData.imageBackground === 'string'
+                            ? siblingData.imageBackground
+                            : null
+
+                        return options.filter((option) => {
+                          const optionValue = typeof option === 'string' ? option : option.value
+                          if (!FEATURED_PRODUCT_IMAGE_BACKGROUND_LEGACY_VALUES.has(optionValue)) {
+                            return true
+                          }
+
+                          return currentValue === optionValue
+                        })
+                      },
+                      admin: {
+                        isClearable: false,
+                        description:
+                          "Choisis un gradient lie aux palettes du site. Le fond est applique uniquement quand l'image est un PNG transparent.",
+                      },
                     },
                     {
                       name: 'name',
@@ -426,6 +465,10 @@ export const Pages: CollectionConfig<'pages'> = {
                         {
                           label: 'X',
                           value: 'x',
+                        },
+                        {
+                          label: 'TikTok',
+                          value: 'tiktok',
                         },
                         {
                           label: 'YouTube',
