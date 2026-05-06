@@ -14,13 +14,16 @@ ENV_FILE="${ENV_FILE:-${APP_BASE_DIR}/.env.production}"
 REPO_URL="${REPO_URL:-https://github.com/Antoaane/Tamahana.git}"
 BRANCH="${BRANCH:-develop}"
 APP_PORT="${APP_PORT:-43127}"
+PRESERVE_MEDIA="${PRESERVE_MEDIA:-true}"
+MEDIA_REL_PATH="${MEDIA_REL_PATH:-public/media}"
+MEDIA_BACKUP_DIR="${MEDIA_BACKUP_DIR:-${APP_BASE_DIR}/.deploy-preserve/media}"
 ENABLE_CERTBOT="${ENABLE_CERTBOT:-false}"
 CERTBOT_EMAIL="${CERTBOT_EMAIL:-antoinelauzis@gmail.com}"
 DOMAIN="${DOMAIN:-tamahana.fr}"
 DOMAIN_WWW="${DOMAIN_WWW:-www.${DOMAIN}}"
 ENABLE_DB_RESET="${ENABLE_DB_RESET:-false}"
 DB_NAME="${DB_NAME:-}"
-DB_OWNER="${DB_OWNER:-}"
+DB_OWNER="${DB_OWNER:-tamahana}"
 DB_OWNER_PASSWORD="${DB_OWNER_PASSWORD:-}"
 
 ########################################
@@ -108,6 +111,11 @@ fi
 
 [ -f "${ENV_FILE}" ] || die "Fichier d'env introuvable: ${ENV_FILE}"
 
+PAYLOAD_SECRET_VALUE="$(get_env_value "PAYLOAD_SECRET" "${ENV_FILE}")"
+DATABASE_URL_VALUE="$(get_env_value "DATABASE_URL" "${ENV_FILE}")"
+[ -n "${PAYLOAD_SECRET_VALUE}" ] || die "PAYLOAD_SECRET manquant dans ${ENV_FILE}"
+[ -n "${DATABASE_URL_VALUE}" ] || die "DATABASE_URL manquant dans ${ENV_FILE}"
+
 ########################################
 # Stop current app instance
 ########################################
@@ -136,7 +144,7 @@ if [ "${ENABLE_DB_RESET}" = "true" ]; then
 
     # Resolve owner + db name from DATABASE_URL when not explicitly provided.
     read -r URL_OWNER URL_DB_NAME < <(
-      node -e "const u=new URL(process.argv[1]); const db=u.pathname.replace(/^\\/+/, ''); process.stdout.write((decodeURIComponent(u.username||'')+' '+decodeURIComponent(db||'')));" "${DATABASE_URL_VALUE}"
+      node -e "const u=new URL(process.argv[1]); const db=u.pathname.replace(/^\\/+/, ''); process.stdout.write((decodeURIComponent(u.username||'')+' '+decodeURIComponent(db||''))+'\n');" "${DATABASE_URL_VALUE}"
     )
 
     [ -n "${DB_NAME_RESOLVED}" ] || DB_NAME_RESOLVED="${URL_DB_NAME}"
@@ -176,14 +184,41 @@ fi
 # Recreate app instance from develop
 ########################################
 ensure_safe_cwd
+
+if [ "${PRESERVE_MEDIA}" = "true" ] && [ -d "${APP_DIR}/${MEDIA_REL_PATH}" ]; then
+  log "Sauvegarde media: ${APP_DIR}/${MEDIA_REL_PATH} -> ${MEDIA_BACKUP_DIR}"
+  rm -rf "${MEDIA_BACKUP_DIR}"
+  mkdir -p "${MEDIA_BACKUP_DIR}"
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -a --delete "${APP_DIR}/${MEDIA_REL_PATH}/" "${MEDIA_BACKUP_DIR}/"
+  else
+    cp -a "${APP_DIR}/${MEDIA_REL_PATH}/." "${MEDIA_BACKUP_DIR}/"
+  fi
+fi
+
 log "Suppression instance applicative: ${APP_DIR}"
 rm -rf "${APP_DIR}"
 
 log "Clone ${REPO_URL} (branche ${BRANCH})"
 sudo -u "${APP_USER}" -H git -C "${APP_BASE_DIR}" clone --branch "${BRANCH}" --single-branch "${REPO_URL}" app
 
-log "Installation dépendances + build + migrations"
-sudo -u "${APP_USER}" -H bash -lc "cd '${APP_DIR}' && npm ci && npm run build && npm run payload -- migrate"
+if [ "${PRESERVE_MEDIA}" = "true" ] && [ -d "${MEDIA_BACKUP_DIR}" ]; then
+  log "Restauration media: ${MEDIA_BACKUP_DIR} -> ${APP_DIR}/${MEDIA_REL_PATH}"
+  mkdir -p "${APP_DIR}/${MEDIA_REL_PATH}"
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -a "${MEDIA_BACKUP_DIR}/" "${APP_DIR}/${MEDIA_REL_PATH}/"
+  else
+    cp -a "${MEDIA_BACKUP_DIR}/." "${APP_DIR}/${MEDIA_REL_PATH}/"
+  fi
+  chown -R "${APP_USER}:${APP_GROUP}" "${APP_DIR}/${MEDIA_REL_PATH}"
+fi
+
+if [ "${ENABLE_DB_RESET}" = "true" ] && [ ! -d "${APP_DIR}/src/migrations" ]; then
+  die "ENABLE_DB_RESET=true mais aucune migration trouvée dans ${APP_DIR}/src/migrations. Génère et versionne les migrations sur la branche ${BRANCH}."
+fi
+
+log "Installation dépendances + migrations + build"
+sudo -u "${APP_USER}" -H bash -lc "cd '${APP_DIR}' && npm ci --include=dev && set -a && source '${ENV_FILE}' && set +a && npm run payload -- migrate && npm run build"
 
 ########################################
 # (Re)create systemd unit each run
