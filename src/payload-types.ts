@@ -207,6 +207,9 @@ export interface Page {
             name?: string | null;
             collection?: string | null;
             price?: string | null;
+            /**
+             * URL interne (/boutique/...) ou externe (https://...).
+             */
             link?: string | null;
             id?: string | null;
           }[]

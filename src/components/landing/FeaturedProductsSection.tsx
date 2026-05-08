@@ -218,6 +218,19 @@ const writeStorage = (key: string, value: unknown) => {
   }
 }
 
+const trim = (value?: string | null) => value?.trim() || ''
+
+const normalizeHref = (href: string) => {
+  if (!href) return ''
+  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(href) || href.startsWith('/') || href.startsWith('#')) {
+    return href
+  }
+
+  return `https://${href}`
+}
+
+const opensInNewTab = (href: string) => /^(https?:)?\/\//i.test(href)
+
 const normalizeProducts = (products?: FeaturedProductItem[] | null) => {
   const items = (products || []).filter((item) => {
     return Boolean(item?.name || item?.collection || item?.price || item?.image || item?.link)
@@ -375,16 +388,35 @@ const WaitlistProductCard = ({
   const image = resolveMediaSource(product.image)
   const shouldApplyPngBackground = image ? isPngMedia(product.image) : false
   const productImageBackground = resolveProductImageBackground(product.imageBackground)
+  const productHref = normalizeHref(trim(product.link))
+  const shouldOpenInNewTab = opensInNewTab(productHref)
+  const productName = product.name || 'Nom de la pièce'
 
   return (
-    <article className="flex h-full flex-col border-2 border-palette-4 bg-palette-2 text-palette-3">
+    <article
+      className={`relative flex h-full flex-col border-2 border-palette-4 bg-palette-2 text-palette-3 ${
+        productHref
+          ? 'transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_1rem_2rem_rgb(55_46_26_/_0.18)] focus-within:-translate-y-1 focus-within:shadow-[0_1rem_2rem_rgb(55_46_26_/_0.18)]'
+          : ''
+      }`}
+    >
+      {productHref ? (
+        <a
+          aria-label={`Voir ${productName}`}
+          className="absolute inset-0 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-palette-3/45 focus-visible:ring-offset-4 focus-visible:ring-offset-palette-1"
+          href={productHref}
+          rel={shouldOpenInNewTab ? 'noopener noreferrer' : undefined}
+          target={shouldOpenInNewTab ? '_blank' : undefined}
+        />
+      ) : null}
+
       <div
         className={`relative aspect-square w-full overflow-hidden ${shouldApplyPngBackground ? '' : 'bg-palette-1/80'}`}
         style={shouldApplyPngBackground ? { background: productImageBackground } : undefined}
       >
         {image ? (
           <NextImage
-            alt={image.alt || product.name || 'Produit'}
+            alt={image.alt || productName || 'Produit'}
             className="object-cover p-[5%]"
             fill
             sizes="(min-width: 1536px) 18rem, (min-width: 1280px) 20rem, (min-width: 1024px) 26vw, (min-width: 768px) 42vw, 78vw"
@@ -396,9 +428,7 @@ const WaitlistProductCard = ({
       </div>
 
       <div className="flex min-h-44 flex-1 flex-col px-5 py-4 md:px-6 md:py-5">
-        <h3 className="whitespace-pre-line font-baskervville text-2xl">
-          {product.name || 'Nom de la pièce'}
-        </h3>
+        <h3 className="whitespace-pre-line font-baskervville text-2xl">{productName}</h3>
         <p className="mt-1 whitespace-pre-line font-baskervville text-lg leading-none text-palette-3/95">
           {product.collection || 'Collection'}
         </p>
@@ -408,7 +438,9 @@ const WaitlistProductCard = ({
             {product.price || '45,95 €'}
           </p>
 
-          <ProductLikeButton productLikeKey={productLikeKey} />
+          <div className="relative z-20">
+            <ProductLikeButton productLikeKey={productLikeKey} />
+          </div>
         </div>
       </div>
     </article>

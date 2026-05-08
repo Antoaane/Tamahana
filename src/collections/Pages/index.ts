@@ -268,7 +268,11 @@ export const Pages: CollectionConfig<'pages'> = {
                     {
                       name: 'link',
                       type: 'text',
-                      label: 'Lien',
+                      label: 'Lien du produit',
+                      admin: {
+                        description: 'URL interne (/boutique/...) ou externe (https://...).',
+                        placeholder: '/boutique/nom-du-produit',
+                      },
                     },
                   ],
                 },
